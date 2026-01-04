@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mixtape Vol. 1 ♪</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f5f5;
+            font-family: 'Courier Prime', monospace;
+            color: #1a1a1a;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 40px;
+        }
+
+        /* === CD CASE STACK === */
+        .cd-case {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        /* CD disc - gira por debajo */
+        .cd-disc {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .cd-disc.spinning {
+            animation: spin-vinyl 4s linear infinite;
+        }
+
+        .cd-disc.paused {
+            animation-play-state: paused;
+        }
+
+        /* Carátula - fija encima */
+        .cd-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        @keyframes spin-vinyl {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* === CONTROLES NEOMÓRFICOS === */
+        .player-controls {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e8e8e8;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.15s ease;
+            
+            /* Neomorphismo - elevado */
+            box-shadow: 
+                6px 6px 12px rgba(0,0,0,0.15),
+                -6px -6px 12px rgba(255,255,255,0.7);
+        }
+
+        .control-btn.play-pause {
+            width: 56px;
+            height: 56px;
+            font-size: 18px;
+        }
+
+        /* Estado pressed - neomorphismo invertido */
+        .control-btn:active:not(:disabled),
+        .control-btn.pressed {
+            box-shadow: 
+                inset 4px 4px 8px rgba(0,0,0,0.15),
+                inset -4px -4px 8px rgba(255,255,255,0.7);
+            color: #999;
+        }
+
+        .control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .player-status {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #999;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #audio-player {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <!-- CD CASE STACK -->
+        <div class="cd-case" id="cd-case">
+            <!-- CAPA 1: CD que gira (z-index: 1) -->
+            <img src="assets/cd.png" alt="CD" class="cd-disc" id="cd-disc">
+            
+            <!-- CAPA 2: Carátula fija (z-index: 2) -->
+            <img src="assets/caratula.png" alt="Case" class="cd-cover">
+        </div>
+
+        <!-- CONTROLES MINIMALISTAS -->
+        <div class="player-controls">
+            <button class="control-btn" id="prev-btn" disabled>⏮</button>
+            <button class="control-btn play-pause" id="play-btn" disabled>▶</button>
+            <button class="control-btn" id="next-btn" disabled>⏭</button>
+        </div>
+
+        <div class="player-status" id="player-status"></div>
+    </div>
+
+    <audio id="audio-player" preload="metadata"></audio>
+
+    <!-- 
+    ═══════════════════════════════════════════════════════════════════
+    CONFIGURACIÓN - TRACKS DESDE GOOGLE DRIVE
+    ═══════════════════════════════════════════════════════════════════
+    -->
+    <script>
+        // LISTA DE TRACKS CON MENSAJES PERSONALIZADOS
+        const TRACKS = [
+            {
+                file: "https://drive.google.com/uc?export=download&id=1Lr32HSdxH9h85UyenAkS0aqYLAZ22Ft8",
+                message: "Mixtape Vol. 1"
+            },
+            {
+                file: "https://drive.google.com/uc?export=download&id=1LHKBynDCN51Z6NHvUW0qGF6w16JfyJ_o",
+                message: "pudiste huir tras esta"
+            },
+            {
+                file: "https://drive.google.com/uc?export=download&id=1OVXriHEb0IZ9FLvpxY6bdPAjZIKCa7Wv",
+                message: "la primera que me recomendaste"
+            },
+            {
+                file: "https://drive.google.com/uc?export=download&id=1ha5kaBJM11odUAE75-tgkK6vikcVrn0e",
+                message: "obviamente tenía que estar"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1qU4yZAsDM-tr2xGGgLlGBgVlpncu84aN",
+                message: "si hubieramos coincidido en 3º de ESO"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1W_Up13Gflz4etoz7K_Df0NUs0yWJAE88",
+                message: "it's giving Karpanta"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1yHHfyI7s6jNjkW1BCLP8QDVmxfA6EsyU",
+                message: "el mp3 echando humo con esto"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1RIEhGEUC_Bc4mwPO8jRY8q-GHD3jMP93",
+                message: "verano"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1_SyueqT3GvIt4qiuty71yUsL2hZh6ZRS",
+                message: "esta nos pegó fuerte"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1ylOLyzdqzDTts0irnKm-wWeQD_SugugY",
+                message: "lo dimos todo"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1huEeQx2Ayo9UZcPvmbKMgZTACDxNVrPN",
+                message: "LA CANCIÓN"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1X85eONliitSgjeKc3THMbgv_MSYsNS-J",
+                message: "¿hace falta decir algo?"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1yoAjSWN8hEPyPfeNYeHoNEyoxFqRTHbO",
+                message: "Lo más cercano a una rave"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1GliyYTOcLkADq5YHZ5VGnaYdMH_SshbQ",
+                message: "Skater's times"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1Vteii_20JtjjE5T9tLN5XM5c2mr02EX2",
+                message: "Esta la tuvimos en bucle"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1RnFERt748SbtqbfWb17S7Ye-_FL_cRQW",
+                message: "Iluminamos con esta :)"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1q8G5mdsSdeXEUGKhFFD8vFwMN5JAAdVQ",
+                message: "de fondo mientras conducimos"
+            },            
+            {
+                file: "https://drive.google.com/uc?export=download&id=1rPGwZ3oAGSOdAeQWyxMQRhSBJG8YNec5",
+                message: "♥︎ ♥︎ ♥︎"
+            },
+            {
+                file: "https://drive.google.com/uc?export=download&id=1fB57n2P52CheRgD9l2XYcKCDoo0MnZ71",
+                message: "para bailar en la cocina"
+            },
+            {
+                file: "https://drive.google.com/uc?export=download&id=1cikq_WvM72GNs8GzzsRgB8f8rWPDyeFL",
+                message: "la última tenía que ser esta ♪"
+            }
+        ];
+    </script>
+
+    <!-- 
+    ═══════════════════════════════════════════════════════════════════
+    NO TOCAR DE AQUÍ PARA ABAJO
+    ═══════════════════════════════════════════════════════════════════
+    Nostalgia.svg (◕‿◕)
+    -->
+    <script>
+        let currentTrackIndex = 0;
+        let audioPlayer = null;
+        let isPlaying = false;
+        let userInitiated = false;
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            audioPlayer = document.getElementById('audio-player');
+            audioPlayer.addEventListener('ended', onTrackEnded);
+            audioPlayer.addEventListener('play', onPlay);
+            audioPlayer.addEventListener('pause', onPause);
+            audioPlayer.addEventListener('error', onError);
+            
+            // Habilitar controles desde el inicio
+            document.getElementById('play-btn').disabled = false;
+            document.getElementById('prev-btn').disabled = false;
+            document.getElementById('next-btn').disabled = false;
+            
+            // Cargar primer track
+            loadTrack(0);
+        }
+
+        function loadTrack(index) {
+            if (!TRACKS[index]) {
+                console.error('✗ Track no encontrado:', index);
+                return;
+            }
+            
+            const track = TRACKS[index];
+            currentTrackIndex = index;
+            
+            // Cargar audio
+            audioPlayer.src = track.file;
+            audioPlayer.load();
+            
+            // Mostrar mensaje del track
+            document.getElementById('player-status').textContent = track.message || '';
+            
+            console.log(`♪ Track cargado: ${index + 1}/${TRACKS.length}`);
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                userInitiated = true;
+                audioPlayer.pause();
+            } else {
+                userInitiated = true;
+                audioPlayer.play().catch(err => {
+                    console.error('✗ Error al reproducir:', err);
+                });
+            }
+        }
+
+        function nextTrack() {
+            const nextIndex = (currentTrackIndex + 1) % TRACKS.length;
+            loadTrack(nextIndex);
+            
+            if (isPlaying) {
+                userInitiated = false; // No cambiar botón, mantener estado
+                setTimeout(() => audioPlayer.play(), 300);
+            }
+        }
+
+        function prevTrack() {
+            const prevIndex = currentTrackIndex - 1 < 0 ? TRACKS.length - 1 : currentTrackIndex - 1;
+            loadTrack(prevIndex);
+            
+            if (isPlaying) {
+                userInitiated = false; // No cambiar botón, mantener estado
+                setTimeout(() => audioPlayer.play(), 300);
+            }
+        }
+
+        function onTrackEnded() {
+            console.log('♪ Track terminado, siguiente...');
+            nextTrack();
+            userInitiated = false; // No cambiar botón en auto-next
+            setTimeout(() => audioPlayer.play(), 500);
+        }
+
+        function onPlay() {
+            isPlaying = true;
+            
+            // Solo cambiar botón si el usuario lo inició
+            if (userInitiated) {
+                document.getElementById('play-btn').textContent = '⏸';
+                userInitiated = false;
+            }
+            
+            // Iniciar rotación del disco
+            const disc = document.getElementById('cd-disc');
+            disc.classList.add('spinning');
+            disc.classList.remove('paused');
+            
+            console.log('♪ Reproduciendo');
+        }
+
+        function onPause() {
+            isPlaying = false;
+            
+            // Solo cambiar botón si el usuario lo inició
+            if (userInitiated) {
+                document.getElementById('play-btn').textContent = '▶';
+                userInitiated = false;
+            }
+            
+            // Pausar disco
+            const disc = document.getElementById('cd-disc');
+            disc.classList.add('paused');
+            
+            console.log('⏸ Pausado');
+        }
+
+        function onError(e) {
+            console.error('✗ Error de audio:', e);
+            document.getElementById('player-status').textContent = '✗';
+            isPlaying = false;
+            document.getElementById('play-btn').textContent = '▶';
+        }
+
+        document.getElementById('play-btn').addEventListener('click', togglePlay);
+        document.getElementById('next-btn').addEventListener('click', nextTrack);
+        document.getElementById('prev-btn').addEventListener('click', prevTrack);
+    </script>
+
+    <!-- Nostalgia.svg (◕‿◕) -->
+</body>
+</html>
