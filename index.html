@@ -95,8 +95,13 @@
             align-items: center;
             justify-content: center;
             font-size: 16px;
+            line-height: 1;
             color: #666;
             transition: all 0.15s ease;
+            
+            /* Forzar estilo texto, no emoji */
+            font-variant-emoji: text;
+            -webkit-font-variant-emoji: text;
             
             /* Neomorphismo - elevado */
             box-shadow: 
@@ -107,7 +112,7 @@
         .control-btn.play-pause {
             width: 56px;
             height: 56px;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         /* Estado pressed - neomorphismo invertido */
@@ -152,102 +157,96 @@
 
         <!-- CONTROLES MINIMALISTAS -->
         <div class="player-controls">
-            <button class="control-btn" id="prev-btn" disabled>⏮</button>
-            <button class="control-btn play-pause" id="play-btn" disabled>▶</button>
-            <button class="control-btn" id="next-btn" disabled>⏭</button>
+            <button class="control-btn" id="prev-btn" disabled>⏮︎</button>
+            <button class="control-btn play-pause" id="play-btn" disabled>▶︎</button>
+            <button class="control-btn" id="next-btn" disabled>⏭︎</button>
         </div>
 
         <div class="player-status" id="player-status"></div>
     </div>
 
     <audio id="audio-player" preload="metadata"></audio>
-
-    <!-- 
-    ═══════════════════════════════════════════════════════════════════
-    CONFIGURACIÓN - TRACKS DESDE GOOGLE DRIVE
-    ═══════════════════════════════════════════════════════════════════
-    -->
     <script>
         // LISTA DE TRACKS CON MENSAJES PERSONALIZADOS
         const TRACKS = [
             {
-                file: "https://drive.google.com/uc?export=download&id=1Lr32HSdxH9h85UyenAkS0aqYLAZ22Ft8",
+                file: "music/01.mp3",
                 message: "Mixtape Vol. 1"
             },
             {
-                file: "https://drive.google.com/uc?export=download&id=1LHKBynDCN51Z6NHvUW0qGF6w16JfyJ_o",
+                file: "music/02.mp3",
                 message: "pudiste huir tras esta"
             },
             {
-                file: "https://drive.google.com/uc?export=download&id=1OVXriHEb0IZ9FLvpxY6bdPAjZIKCa7Wv",
+                file: "music/03.mp3",
                 message: "la primera que me recomendaste"
             },
             {
-                file: "https://drive.google.com/uc?export=download&id=1ha5kaBJM11odUAE75-tgkK6vikcVrn0e",
+                file: "music/04.mp3",
                 message: "obviamente tenía que estar"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1qU4yZAsDM-tr2xGGgLlGBgVlpncu84aN",
+                file: "music/05.mp3",
                 message: "si hubieramos coincidido en 3º de ESO"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1W_Up13Gflz4etoz7K_Df0NUs0yWJAE88",
+                file: "music/06.mp3",
                 message: "it's giving Karpanta"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1yHHfyI7s6jNjkW1BCLP8QDVmxfA6EsyU",
+                file: "music/07.mp3",
                 message: "el mp3 echando humo con esto"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1RIEhGEUC_Bc4mwPO8jRY8q-GHD3jMP93",
+                file: "music/08.mp3",
                 message: "verano"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1_SyueqT3GvIt4qiuty71yUsL2hZh6ZRS",
+                file: "music/09.mp3",
                 message: "esta nos pegó fuerte"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1ylOLyzdqzDTts0irnKm-wWeQD_SugugY",
+                file: "music/10.mp3",
                 message: "lo dimos todo"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1huEeQx2Ayo9UZcPvmbKMgZTACDxNVrPN",
+                file: "music/11.mp3",
                 message: "LA CANCIÓN"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1X85eONliitSgjeKc3THMbgv_MSYsNS-J",
+                file: "music/12.mp3",
                 message: "¿hace falta decir algo?"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1yoAjSWN8hEPyPfeNYeHoNEyoxFqRTHbO",
+                file: "music/13.mp3",
                 message: "Lo más cercano a una rave"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1GliyYTOcLkADq5YHZ5VGnaYdMH_SshbQ",
+                file: "music/14.mp3",
                 message: "Skater's times"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1Vteii_20JtjjE5T9tLN5XM5c2mr02EX2",
+                file: "music/15.mp3",
                 message: "Esta la tuvimos en bucle"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1RnFERt748SbtqbfWb17S7Ye-_FL_cRQW",
+                file: "music/16.mp3",
                 message: "Iluminamos con esta :)"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1q8G5mdsSdeXEUGKhFFD8vFwMN5JAAdVQ",
+                file: "music/17.mp3",
                 message: "de fondo mientras conducimos"
             },            
             {
-                file: "https://drive.google.com/uc?export=download&id=1rPGwZ3oAGSOdAeQWyxMQRhSBJG8YNec5",
+                file: "music/18.mp3",
                 message: "♥︎ ♥︎ ♥︎"
             },
             {
-                file: "https://drive.google.com/uc?export=download&id=1fB57n2P52CheRgD9l2XYcKCDoo0MnZ71",
+                file: "music/19.mp3",
                 message: "para bailar en la cocina"
             },
             {
-                file: "https://drive.google.com/uc?export=download&id=1cikq_WvM72GNs8GzzsRgB8f8rWPDyeFL",
+                file: "music/20.mp3",
                 message: "la última tenía que ser esta ♪"
             }
         ];
@@ -346,7 +345,7 @@
             
             // Solo cambiar botón si el usuario lo inició
             if (userInitiated) {
-                document.getElementById('play-btn').textContent = '⏸';
+                document.getElementById('play-btn').textContent = '⏸︎';
                 userInitiated = false;
             }
             
@@ -363,7 +362,7 @@
             
             // Solo cambiar botón si el usuario lo inició
             if (userInitiated) {
-                document.getElementById('play-btn').textContent = '▶';
+                document.getElementById('play-btn').textContent = '▶︎';
                 userInitiated = false;
             }
             
@@ -378,7 +377,7 @@
             console.error('✗ Error de audio:', e);
             document.getElementById('player-status').textContent = '✗';
             isPlaying = false;
-            document.getElementById('play-btn').textContent = '▶';
+            document.getElementById('play-btn').textContent = '▶︎';
         }
 
         document.getElementById('play-btn').addEventListener('click', togglePlay);
